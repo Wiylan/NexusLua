@@ -19,6 +19,19 @@ menu.divider(menu.my_root(), "-- Nexus --")
 local selfMenu <const> = menu.list(menu.my_root(), "Self", {}, "")
 menu.divider(selfMenu, "-- Self --")
 
+menu.toggle(selfMenu, "Undead OTR", {"undeadotr"}, "Better Off The Radar. Can get detected by some menus.", function(toggle)
+	undeadOtrToggle = toggle
+	local maxHealth <const> = ENTITY.GET_ENTITY_MAX_HEALTH(players.user_ped())
+	while undeadOtrToggle do
+		if ENTITY.GET_ENTITY_MAX_HEALTH(players.user_ped()) != 0 then
+			ENTITY.SET_ENTITY_MAX_HEALTH(players.user_ped(), 0)
+		end
+		util.yield()
+	end
+	ENTITY.SET_ENTITY_MAX_HEALTH(players.user_ped(), maxHealth)
+	undeadOtrToggle = nil
+end)
+
 menu.toggle(selfMenu, "No Knockout", {"noknockout"}, "Prevents the knockout animation from playing on your ped.", function(toggle)
 	noKnockoutToggle = toggle
 	if noKnockoutToggle then
