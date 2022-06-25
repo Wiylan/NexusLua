@@ -68,7 +68,7 @@ sportmode = menu.toggle_loop(vehicleMenu, "Sportmode", {"sportmode"}, "Makes you
 	local camPos <const> = CAM.GET_GAMEPLAY_CAM_ROT(0)
 	local speed = sportmodeSpeed * 10
 
-	if vehicle == 0 or not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+	if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
 		util.toast("You need to be inside/on a Vehicle. :/")
 		menu.trigger_command(sportmode, "off")
 		return
@@ -76,9 +76,7 @@ sportmode = menu.toggle_loop(vehicleMenu, "Sportmode", {"sportmode"}, "Makes you
 
 	ENTITY.SET_ENTITY_ROTATION(vehicle, camPos.x, camPos.y, camPos.z, 1, true)
 	VEHICLE.SET_VEHICLE_GRAVITY(vehicle, false)
-	if noclipVehicle then
-		ENTITY.SET_ENTITY_COLLISION(vehicle, false, true)
-	end
+	ENTITY.SET_ENTITY_COLLISION(vehicle, not noclipVehicle, true)
 
 	if PAD.IS_CONTROL_PRESSED(0, 61) then
 		speed *= 2
@@ -134,8 +132,10 @@ sportmode = menu.toggle_loop(vehicleMenu, "Sportmode", {"sportmode"}, "Makes you
 	end
 end, function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-	VEHICLE.SET_VEHICLE_GRAVITY(vehicle, true)
-	ENTITY.SET_ENTITY_COLLISION(vehicle, true, true)
+	if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+		VEHICLE.SET_VEHICLE_GRAVITY(vehicle, true)
+		ENTITY.SET_ENTITY_COLLISION(vehicle, true, true)
+	end
 end)
 
 local sportmodeMenu <const> = menu.list(vehicleMenu, "Sportmode Settings", {}, "Configure Sportmode.")
@@ -160,14 +160,16 @@ menu.divider(vehicleMenu, "-- Miscellaneous --")
 
 menu.toggle_loop(vehicleMenu, "Low Traction", {"driftmode"}, "Ideal for drifting.\nSetting a hotkey is recommended.", function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-	if vehicle and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+	if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
 		VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, true)
 		--VEHICLE._SET_VEHICLE_REDUCE_TRACTION(vehicle, 0.0)
-	end
-	if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 2) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
-		VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, false)
+		if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 2) then
+			VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, false)
+		end
 	end
 end, function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-	VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, false)
+	if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+		VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, false)
+	end
 end)
