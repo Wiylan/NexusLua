@@ -155,3 +155,19 @@ end)
 menu.toggle(sportmodeMenu, "Stop on Exit", {}, "", function(toggle)
 	stopOnExit = toggle
 end)
+
+menu.divider(vehicleMenu, "-- Miscellaneous --")
+
+menu.toggle_loop(vehicleMenu, "Low Traction", {"driftmode"}, "Ideal for drifting.\nSetting a hotkey is recommended.", function()
+	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
+	if vehicle and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+		VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, true)
+		--VEHICLE._SET_VEHICLE_REDUCE_TRACTION(vehicle, 0.0)
+	end
+	if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 2) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+		VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, false)
+	end
+end, function()
+	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
+	VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, false)
+end)
