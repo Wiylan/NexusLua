@@ -6,6 +6,8 @@
 
 ----- Credits -----
 -------------------
+----- Nowiry ------
+----- Jackz -------
 ----- Jayphen -----
 ----- Sapphire ----
 -------------------
@@ -213,7 +215,7 @@ function controlVehicle(pid)
 		menu.trigger_command(spectate, "off")
 	end
 	if targetVehicle == 0 then
-		util.toast(players.get_name(pid) .. " is not in a Vehicle. :/")
+		util.toast(players.get_name(pid) .. " isn't in a vehicle. :/")
 	end
 	return targetVehicle
 end
@@ -248,11 +250,23 @@ function playerRoot(pid)
 			VEHICLE.SET_VEHICLE_TYRE_BURST(vehicle, i, true, 1000)
 		end
 	end)
+	menu.action(playerVehicleMenu, "Boost Forward", {}, "", function()
+		local vehicle <const> = controlVehicle(pid)
+		if vehicle != 0 then
+			local force <const> = ENTITY.GET_ENTITY_FORWARD_VECTOR(vehicle)
+			force:mul(40.0)
+			--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, true)
+			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, force.x, force.y, force.z, 0.0, 0.0, 0.0, 1, false, true, true, true, true)
+			--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, false)
+		end
+	end)
 	menu.action(playerVehicleMenu, "Catapult", {}, "", function()
 		local vehicle <const> = controlVehicle(pid)
-		--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, true)
-		ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, 0, 0, 9999, 0, 0, 0, 1, false, true, true, true, true)
-		--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, false)
+		if vehicle != 0 then
+			--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, true)
+			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, 0, 0, 9999, 0, 0, 0, 1, false, true, true, true, true)
+			--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, false)
+		end
 	end)
 	menu.action(playerVehicleMenu, "Delete", {}, "", function()
 		local vehicle <const> = controlVehicle(pid)
