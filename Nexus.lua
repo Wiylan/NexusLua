@@ -27,7 +27,7 @@ menu.divider(menu.my_root(), "-- Nexus --")
 local selfMenu <const> = menu.list(menu.my_root(), "Self", {}, "")
 menu.divider(selfMenu, "-- Self --")
 
-menu.toggle(selfMenu, "Undead OTR", {"undeadotr"}, "Better Off The Radar. Can get detected by some menus.", function(toggle)
+menu.toggle(selfMenu, "Undead OTR", {"undeadotr"}, "Better Off The Radar.\nCan get detected by some menus.", function(toggle)
 	undeadOtrToggle = toggle
 	local maxHealth <const> = ENTITY.GET_ENTITY_MAX_HEALTH(players.user_ped())
 	while undeadOtrToggle do
@@ -158,7 +158,42 @@ menu.toggle(sportmodeMenu, "Stop on Exit", {}, "", function(toggle)
 	stopOnExit = toggle
 end)
 
-menu.divider(vehicleMenu, "Miscellaneous")
+menu.divider(vehicleMenu, "")
+local nitroMenu <const> = menu.list(vehicleMenu, "Nitro", {}, "")
+
+local duration = 2500
+local recharge = 1000
+local power = 1
+local sound = true
+
+menu.toggle_loop(nitroMenu, "Nitro", {"nitro"}, "Activate with X.", function()
+	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
+	if PAD.IS_CONTROL_JUST_PRESSED(0, 73) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+		STREAMING.REQUEST_NAMED_PTFX_ASSET("veh_xs_vehicle_mods")
+		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, true, duration / 1000, power, 10000000, not sound)
+		util.yield(duration)
+		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, false, 1, 1, 1, false)
+		util.yield(recharge)
+	end
+end, function()
+	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
+	if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, false, 1, 1, 1, false)
+	end
+end)
+
+menu.slider(nitroMenu, "Duration", {}, "How long the boost lasts.\nIn ms.", 1, 10000000, 2500, 100, function(change)
+	duration = change
+end)
+menu.slider(nitroMenu, "Recharge Time", {}, "How long the boost recharges.\nIn ms.", 0, 10000000, 1000, 100, function(change)
+	recharge = change
+end)
+menu.slider(nitroMenu, "Power", {}, "How much force the boost applies.", 0, 50, 1, 1, function(change)
+	power = change
+end)
+menu.toggle(nitroMenu, "Sound", {}, "Whether the boost should make sound.", function(toggle)
+	sound = toggle
+end, true)
 
 menu.toggle_loop(vehicleMenu, "Low Traction", {"driftmode"}, "Ideal for drifting.\nSetting a hotkey is recommended.", function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
@@ -250,17 +285,17 @@ function playerRoot(pid)
 			VEHICLE.SET_VEHICLE_TYRE_BURST(vehicle, i, true, 1000)
 		end
 	end)
-	menu.action(playerVehicleMenu, "Boost Forward", {}, "", function()
+	menu.action(playerVehicleMenu, "Boost Forward", {}, "May not sync.", function()
 		local vehicle <const> = controlVehicle(pid)
 		if vehicle != 0 then
 			local force <const> = ENTITY.GET_ENTITY_FORWARD_VECTOR(vehicle)
-			force:mul(40.0)
+			force:mul(40)
 			--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, true)
-			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, force.x, force.y, force.z, 0.0, 0.0, 0.0, 1, false, true, true, true, true)
+			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, force.x, force.y, force.z, 0, 0, 0, 1, false, true, true, true, true)
 			--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, false)
 		end
 	end)
-	menu.action(playerVehicleMenu, "Catapult", {}, "", function()
+	menu.action(playerVehicleMenu, "Catapult", {}, "May not sync.", function()
 		local vehicle <const> = controlVehicle(pid)
 		if vehicle != 0 then
 			--AUDIO.SET_VEHICLE_BOOST_ACTIVE(vehicle, true)
