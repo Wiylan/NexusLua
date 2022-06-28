@@ -307,6 +307,10 @@ function playerRoot(pid)
 		local vehicle <const> = controlVehicle(pid)
 		entities.delete_by_handle(vehicle)
 	end)
+
+	menu.action(menu.player_root(pid), "Send to Beach", {}, "Summons them to Del Perro Beach", function()
+		util.trigger_script_event(1 << pid, {1463943751, 1, 0, 0, 4, 0})
+	end)
 end
 
 players.on_join(playerRoot)
