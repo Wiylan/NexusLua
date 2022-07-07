@@ -65,7 +65,17 @@ local noGravity = false
 local noclipVehicle = false
 local stopOnExit = false
 
-sportmode = menu.toggle_loop(vehicleMenu, "Sportmode", {"sportmode"}, "Makes your vehicle fly.", function()
+local sportmode <const> = menu.toggle_loop(vehicleMenu, "Sportmode", {"sportmode"}, "Makes your vehicle fly.", function()
+	vehicleFly()
+end, function()
+	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
+	if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+		VEHICLE.SET_VEHICLE_GRAVITY(vehicle, true)
+		ENTITY.SET_ENTITY_COLLISION(vehicle, true, true)
+	end
+end)
+
+function vehicleFly()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
 	local camPos <const> = CAM.GET_GAMEPLAY_CAM_ROT(0)
 	local speed = sportmodeSpeed * 10
@@ -107,7 +117,7 @@ sportmode = menu.toggle_loop(vehicleMenu, "Sportmode", {"sportmode"}, "Makes you
 			lsp = 0 - sportmodeSpeed
 		end
 		if noGravity then
-			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, (lsp), 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
+			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, lsp, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
 		else
 			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, 0 - (speed), 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
 		end
@@ -132,13 +142,7 @@ sportmode = menu.toggle_loop(vehicleMenu, "Sportmode", {"sportmode"}, "Makes you
 			VEHICLE.SET_VEHICLE_FORWARD_SPEED(vehicle, 0)
 		end
 	end
-end, function()
-	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-	if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
-		VEHICLE.SET_VEHICLE_GRAVITY(vehicle, true)
-		ENTITY.SET_ENTITY_COLLISION(vehicle, true, true)
-	end
-end)
+end
 
 local sportmodeMenu <const> = menu.list(vehicleMenu, "Sportmode Settings", {}, "Configure Sportmode.")
 
