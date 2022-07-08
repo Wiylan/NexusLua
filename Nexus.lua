@@ -216,6 +216,147 @@ end, function()
 end)
 
 --[[
+---------------------------------
+--- Language Reaction Options ---
+---------------------------------
+--]]
+
+local languages = {
+	{ language = "English", toggle = false },
+	{ language = "French", toggle = false },
+	{ language = "German", toggle = false },
+	{ language = "Italian", toggle = false },
+	{ language = "Spanish", toggle = false },
+	{ language = "Brazilian", toggle = false },
+	{ language = "Polish", toggle = false },
+	{ language = "Russian", toggle = false },
+	{ language = "Korean", toggle = false },
+	{ language = "Chinese Traditional", toggle = false },
+	{ language = "Japanese", toggle = false },
+	{ language = "Mexican", toggle = false },
+	{ language = "Chinese Simplified", toggle = false }
+}
+
+local languageMenu <const> = menu.list(menu.my_root(), "Language Reactions", {}, "")
+menu.divider(languageMenu, "-- Language Reactions --")
+
+local languageSelectMenu <const> = menu.list(languageMenu, "Languages", {}, "")
+
+local languageNotification = true
+local languageKick = false
+local languageCrash = false
+
+for i, v in ipairs(languages) do
+	local language <const> = languages[i].language
+	menu.toggle(languageSelectMenu, language, {}, language, function(toggle)
+		while util.is_session_transition_active() do
+			util.yield()
+		end
+		languages[i].toggle = toggle
+		if toggle then
+			if languageNotification then
+				local playerList <const> = players.list(false, true, true)
+				for i, pid in ipairs(playerList) do
+					if languages[players.get_language(pid) + 1].toggle then
+						util.toast(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)")
+						util.yield(100)
+					end
+				end
+			end
+			if languageCrash then
+				local playerList <const> = players.list(false, true, true)
+				for i, pid in ipairs(playerList) do
+					if languages[players.get_language(pid) + 1].toggle then
+						menu.trigger_command(menu.ref_by_rel_path(menu.player_root(pid), "Crash>Elegant"), players.get_name(pid))
+						util.yield(100)
+					end
+				end
+			end
+			if languageKick then
+				local playerList <const> = players.list(false, true, true)
+				for i, pid in ipairs(playerList) do
+					if languages[players.get_language(pid) + 1].toggle then
+						menu.trigger_command(menu.ref_by_rel_path(menu.player_root(pid), "Kick>Smart"), players.get_name(pid))
+						util.yield(100)
+					end
+				end
+			end
+		end
+	end)
+end
+
+local languageReactionMenu <const> = menu.list(languageMenu, "Reaction", {}, "")
+
+menu.toggle(languageReactionMenu, "Notification", {}, "", function(toggle)
+	while util.is_session_transition_active() do
+		util.yield()
+	end
+	languageNotification = toggle
+	if languageNotification then
+		local playerList <const> = players.list(false, true, true)
+		for i, pid in ipairs(playerList) do
+			if languages[players.get_language(pid) + 1].toggle then
+				util.toast(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)")
+				util.yield(100)
+			end
+		end
+	end
+end, true)
+menu.toggle(languageReactionMenu, "Kick", {}, "", function(toggle)
+	while util.is_session_transition_active() do
+		util.yield()
+	end
+	languageKick = toggle
+	if languageKick then
+		local playerList <const> = players.list(false, true, true)
+		for i, pid in ipairs(playerList) do
+			if languages[players.get_language(pid) + 1].toggle then
+				menu.trigger_command(menu.ref_by_rel_path(menu.player_root(pid), "Kick>Smart"), players.get_name(pid))
+				util.yield(100)
+			end
+		end
+	end
+end)
+menu.toggle(languageReactionMenu, "Crash", {}, "", function(toggle)
+	while util.is_session_transition_active() do
+		util.yield()
+	end
+	languageCrash = toggle
+	if languageCrash then
+		local playerList <const> = players.list(false, true, true)
+		for i, pid in ipairs(playerList) do
+			if languages[players.get_language(pid) + 1].toggle then
+				menu.trigger_command(menu.ref_by_rel_path(menu.player_root(pid), "Crash>Elegant"), players.get_name(pid))
+				util.yield(100)
+			end
+		end
+	end
+end)
+
+players.on_join(function(pid)
+	while util.is_session_transition_active() do
+		util.yield()
+	end
+	if languageNotification then
+		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
+			util.toast(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)")
+		end
+	end
+	if languageCrash then
+		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
+			menu.trigger_command(menu.ref_by_rel_path(menu.player_root(pid), "Crash>Elegant"), players.get_name(pid))
+			util.yield(100)
+		end
+	end
+	if languageKick then
+		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
+			menu.trigger_command(menu.ref_by_rel_path(menu.player_root(pid), "Kick>Smart"), players.get_name(pid))
+			util.yield(100)
+		end
+	end
+end)
+
+--[[
 ----------------------
 --- Player Options ---
 ----------------------
@@ -312,8 +453,11 @@ function playerRoot(pid)
 		entities.delete_by_handle(vehicle)
 	end)
 
-	menu.action(menu.player_root(pid), "Send to Beach", {}, "Summons them to Del Perro Beach", function()
+	menu.action(menu.player_root(pid), "Send to Beach", {}, "Summons them to Del Perro Beach.", function()
 		util.trigger_script_event(1 << pid, {1463943751, 1, 0, 0, 4, 0})
+	end)
+	menu.action(menu.player_root(pid), "Check Language", {}, "Checks the language of their game.", function()
+		util.toast(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)")
 	end)
 end
 
