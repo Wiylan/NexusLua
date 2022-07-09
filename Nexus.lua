@@ -243,12 +243,14 @@ menu.divider(languageMenu, "-- Language Reactions --")
 local languageSelectMenu <const> = menu.list(languageMenu, "Languages", {}, "")
 
 local languageNotification = true
+local languageLog = false
+local languageChat = false
+local languageTeamChat = false
 local languageKick = false
 local languageCrash = false
 
 for i, v in ipairs(languages) do
-	local language <const> = languages[i].language
-	menu.toggle(languageSelectMenu, language, {}, language, function(toggle)
+	menu.toggle(languageSelectMenu, languages[i].language, {}, "", function(toggle)
 		while util.is_session_transition_active() do
 			util.yield()
 		end
@@ -259,6 +261,33 @@ for i, v in ipairs(languages) do
 				for i, pid in ipairs(playerList) do
 					if languages[players.get_language(pid) + 1].toggle then
 						util.toast(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)")
+						util.yield(100)
+					end
+				end
+			end
+			if languageLog then
+				local playerList <const> = players.list(false, true, true)
+				for i, pid in ipairs(playerList) do
+					if languages[players.get_language(pid) + 1].toggle then
+						util.log(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ".")
+						util.yield(100)
+					end
+				end
+			end
+			if languageChat then
+				local playerList <const> = players.list(false, true, true)
+				for i, pid in ipairs(playerList) do
+					if languages[players.get_language(pid) + 1].toggle then
+						chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
+						util.yield(100)
+					end
+				end
+			end
+			if languageTeamChat then
+				local playerList <const> = players.list(false, true, true)
+				for i, pid in ipairs(playerList) do
+					if languages[players.get_language(pid) + 1].toggle then
+						chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
 						util.yield(100)
 					end
 				end
@@ -302,6 +331,54 @@ menu.toggle(languageReactionMenu, "Notification", {}, "", function(toggle)
 		end
 	end
 end, true)
+menu.toggle(languageReactionMenu, "Write To Log", {}, "", function(toggle)
+	while util.is_session_transition_active() do
+		util.yield()
+	end
+	languageLog = toggle
+	if languageLog then
+		local playerList <const> = players.list(false, true, true)
+		for i, pid in ipairs(playerList) do
+			if languages[players.get_language(pid) + 1].toggle then
+				util.log(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ".")
+				util.yield(100)
+			end
+		end
+	end
+end)
+menu.toggle(languageReactionMenu, "Announce In Chat", {}, "", function(toggle)
+	while util.is_session_transition_active() do
+		util.yield()
+	end
+	languageChat = toggle
+	if languageChat then
+		local playerList <const> = players.list(false, true, true)
+		for i, pid in ipairs(playerList) do
+			if languages[players.get_language(pid) + 1].toggle then
+				chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
+				util.yield(100)
+			end
+		end
+	end
+end)
+menu.toggle(languageReactionMenu, "Announce In Team Chat", {}, "", function(toggle)
+	while util.is_session_transition_active() do
+		util.yield()
+	end
+	languageTeamChat = toggle
+	if languageTeamChat then
+		local playerList <const> = players.list(false, true, true)
+		for i, pid in ipairs(playerList) do
+			if languages[players.get_language(pid) + 1].toggle then
+				chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
+				util.yield(100)
+			end
+		end
+	end
+end)
+
+menu.divider(languageReactionMenu, "Player Actions")
+
 menu.toggle(languageReactionMenu, "Kick", {}, "", function(toggle)
 	while util.is_session_transition_active() do
 		util.yield()
@@ -340,6 +417,21 @@ players.on_join(function(pid)
 	if languageNotification then
 		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
 			util.toast(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)")
+		end
+	end
+	if languageLog then
+		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
+			util.log(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ".")
+		end
+	end
+	if languageChat then
+		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
+			chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
+		end
+	end
+	if languageTeamChat then
+		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
+			chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
 		end
 	end
 	if languageCrash then
