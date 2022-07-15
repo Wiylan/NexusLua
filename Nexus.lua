@@ -6,9 +6,10 @@
 
 ----- Credits -----
 -------------------
------ Nowiry ------
 ----- Jackz -------
 ----- Jayphen -----
+----- Nowiry ------
+----- Prism -------
 ----- Sapphire ----
 -------------------
 --]]
@@ -454,6 +455,39 @@ end)
 ----------------------
 --]]
 
+local businessProperties <const> = {
+	-- Clubhouses
+	"1334 Roy Lowenstein Blvd",
+	"7 Del Perro Beach",
+	"75 Elgin Avenue",
+	"101 Route 68",
+	"1 Paleto Blvd",
+	"47 Algonquin Blvd",
+	"137 Capital Blvd",
+	"2214 Clinton Avenue",
+	"1778 Hawick Avenue",
+	"2111 East Joshua Road",
+	"68 Paleto Blvd",
+	"4 Goma Street",
+	-- Facilities
+	"Grand Senora Desert",
+	"Route 68",
+	"Sandy Shores",
+	"Mount Gordo",
+	"Paleto Bay",
+	"Lago Zancudo",
+	"Zancudo River",
+	"Ron Alternates Wind Farm",
+	"Land Act Reservoir",
+	-- Arcades
+	"Pixel Pete's - Paleto Bay",
+	"Wonderama - Grapeseed",
+	"Warehouse - Davis",
+	"Eight-Bit - Vinewood",
+	"Insert Coin - Rockford Hills",
+	"Videogeddon - La Mesa"
+}
+
 function controlVehicle(pid)
 	local pos <const> = players.get_position(players.user())
 	local targetPos <const> = players.get_position(pid)
@@ -492,8 +526,48 @@ function controlVehicle(pid)
 	return targetVehicle
 end
 
-function playerRoot(pid)
+players.on_join(function(pid)
 	menu.divider(menu.player_root(pid), "-- Nexus --")
+
+	local playerSETPMenu <const> = menu.list(menu.player_root(pid), "SE Teleport", {}, "")
+	menu.divider(playerSETPMenu, "-- SE Teleport --")
+
+	local playerSETPCayoPericoMenu <const> = menu.list(playerSETPMenu, "Cayo Perico", {}, "")
+	local playerSETPClubhouseMenu <const> = menu.list(playerSETPMenu, "Clubhouse", {}, "")
+	local playerSETPFacilityMenu <const> = menu.list(playerSETPMenu, "Facility", {}, "")
+	local playerSETPArcadeMenu <const> = menu.list(playerSETPMenu, "Arcade", {}, "Will force them on a vehicle.")
+
+	menu.action(playerSETPCayoPericoMenu, "Teleport To Cayo Perico", {}, "", function()
+		util.trigger_script_event(1 << pid, {1463943751, pid, 0, 0, 3, 1, 0})
+	end)
+	menu.action(playerSETPCayoPericoMenu, "Teleport To Cayo Perico (No Cutscene)", {}, "", function()
+		util.trigger_script_event(1 << pid, {1463943751, pid, 0, 0, 4, 1, 0})
+	end)
+	menu.action(playerSETPCayoPericoMenu, "Teleport To Main Island", {}, "Target needs to be at Cayo Perico.", function()
+		util.trigger_script_event(1 << pid, {1463943751, pid, 0, 0, 3, 0, 0})
+	end)
+	menu.action(playerSETPCayoPericoMenu, "Kicked From Cayo Perico", {}, "Summons them to Del Perro Beach.", function()
+		util.trigger_script_event(1 << pid, {1463943751, pid, 0, 0, 4, 0, 0})
+	end)
+
+	for i, name in ipairs(businessProperties) do
+		if i < 13 then
+			menu.action(playerSETPClubhouseMenu, name, {}, "", function()
+				local netHash <const> = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid)
+				util.trigger_script_event(1 << pid, {962740265, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, math.random(1, 10)})
+			end)
+		elseif i < 22 then
+			menu.action(playerSETPFacilityMenu, name, {}, "", function()
+				local netHash <const> = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid)
+				util.trigger_script_event(1 << pid, {962740265, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0})
+			end)
+		else
+			menu.action(playerSETPArcadeMenu, name, {}, "Will force them on a vehicle.", function()
+				local netHash <const> = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid)
+				util.trigger_script_event(1 << pid, {962740265, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1})
+			end)
+		end
+	end
 
 	local playerVehicleMenu <const> = menu.list(menu.player_root(pid), "Vehicle", {}, "Functionality depends on network conditions.")
 	menu.divider(playerVehicleMenu, "-- Vehicle --")
@@ -545,13 +619,9 @@ function playerRoot(pid)
 		entities.delete_by_handle(vehicle)
 	end)
 
-	menu.action(menu.player_root(pid), "Send to Beach", {}, "Summons them to Del Perro Beach.", function()
-		util.trigger_script_event(1 << pid, {1463943751, 1, 0, 0, 4, 0})
-	end)
 	menu.action(menu.player_root(pid), "Check Language", {}, "Checks the language of their game.", function()
 		util.toast(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)")
 	end)
-end
+end)
 
-players.on_join(playerRoot)
 players.dispatch_on_join()
