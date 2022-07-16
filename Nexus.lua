@@ -62,9 +62,9 @@ local vehicleMenu <const> = menu.list(menu.my_root(), "Vehicle", {}, "")
 menu.divider(vehicleMenu, "-- Vehicle --")
 
 local sportmodeSpeed = 10
-local noGravity = false
-local noclipVehicle = false
-local stopOnExit = false
+local sportmodeNoGravity = false
+local sportmodeNoclipVehicle = false
+local sportmodeStopOnExit = false
 
 local sportmode <const> = menu.toggle_loop(vehicleMenu, "Sportmode", {"sportmode"}, "Makes your vehicle fly.", function()
 	vehicleFly()
@@ -89,13 +89,13 @@ function vehicleFly()
 
 	ENTITY.SET_ENTITY_ROTATION(vehicle, camPos.x, camPos.y, camPos.z, 1, true)
 	VEHICLE.SET_VEHICLE_GRAVITY(vehicle, false)
-	ENTITY.SET_ENTITY_COLLISION(vehicle, not noclipVehicle, true)
+	ENTITY.SET_ENTITY_COLLISION(vehicle, not sportmodeNoclipVehicle, true)
 
 	if PAD.IS_CONTROL_PRESSED(0, 61) then
 		speed *= 2
 	end
 	if PAD.IS_CONTROL_PRESSED(0, 71) then
-		if noGravity then
+		if sportmodeNoGravity then
 			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, 0, sportmodeSpeed, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
 		else
 			VEHICLE.SET_VEHICLE_FORWARD_SPEED(vehicle, speed)
@@ -106,7 +106,7 @@ function vehicleFly()
 		if not PAD.IS_CONTROL_PRESSED(0, 61) then
 			lsp = sportmodeSpeed * 2
 		end
-		if noGravity then
+		if sportmodeNoGravity then
 			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, 0, 0 - (lsp), 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
 		else
 			VEHICLE.SET_VEHICLE_FORWARD_SPEED(vehicle, 0 - (speed))
@@ -117,7 +117,7 @@ function vehicleFly()
 		if not PAD.IS_CONTROL_PRESSED(0, 61) then
 			lsp = 0 - sportmodeSpeed
 		end
-		if noGravity then
+		if sportmodeNoGravity then
 			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, lsp, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
 		else
 			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, 0 - (speed), 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
@@ -128,18 +128,18 @@ function vehicleFly()
 		if not PAD.IS_CONTROL_PRESSED(0, 61) then
 			lsp = sportmodeSpeed * 2
 		end
-		if noGravity then
+		if sportmodeNoGravity then
 			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, lsp, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
 		else
 			ENTITY.APPLY_FORCE_TO_ENTITY(vehicle, 1, speed, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1)
 		end
 	end
-	if not noGravity and not PAD.IS_CONTROL_PRESSED(0, 71) and not PAD.IS_CONTROL_PRESSED(0, 72) then
+	if not sportmodeNoGravity and not PAD.IS_CONTROL_PRESSED(0, 71) and not PAD.IS_CONTROL_PRESSED(0, 72) then
 		VEHICLE.SET_VEHICLE_FORWARD_SPEED(vehicle, 0)
 	end
 	if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 2) then
 		menu.trigger_command(sportmode, "off")
-		if stopOnExit then
+		if sportmodeStopOnExit then
 			VEHICLE.SET_VEHICLE_FORWARD_SPEED(vehicle, 0)
 		end
 	end
@@ -154,31 +154,31 @@ menu.action(sportmodeMenu, "Speed Limit", {}, "Command: speedlimit [0 to 10000]"
 	menu.show_command_box("speedlimit " .. menu.get_value(menu.ref_by_command_name("speedlimit")))
 end)
 menu.toggle(sportmodeMenu, "No Gravity", {}, "", function(toggle)
-	noGravity = toggle
+	sportmodeNoGravity = toggle
 end)
 menu.toggle(sportmodeMenu, "No Collision", {}, "", function(toggle)
-	noclipVehicle = toggle
+	sportmodeNoclipVehicle = toggle
 end)
 menu.toggle(sportmodeMenu, "Stop on Exit", {}, "", function(toggle)
-	stopOnExit = toggle
+	sportmodeStopOnExit = toggle
 end)
 
 menu.divider(vehicleMenu, "")
 local nitroMenu <const> = menu.list(vehicleMenu, "Nitro", {}, "")
 
-local duration = 2500
-local recharge = 1000
-local power = 1
-local sound = true
+local nitroDuration = 2500
+local nitroRecharge = 1000
+local nitroPower = 1
+local nitroSound = true
 
 menu.toggle_loop(nitroMenu, "Nitro", {"nitro"}, "Activate with X.", function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
 	if PAD.IS_CONTROL_JUST_PRESSED(0, 73) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
 		STREAMING.REQUEST_NAMED_PTFX_ASSET("veh_xs_vehicle_mods")
-		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, true, duration / 1000, power, 10000000, not sound)
-		util.yield(duration)
+		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, true, nitroDuration / 1000, nitroPower, 10000000, not nitroSound)
+		util.yield(nitroDuration)
 		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, false, 1, 1, 1, false)
-		util.yield(recharge)
+		util.yield(nitroRecharge)
 	end
 end, function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
@@ -188,16 +188,16 @@ end, function()
 end)
 
 menu.slider(nitroMenu, "Duration", {}, "How long the boost lasts.\nIn ms.", 1, 10000000, 2500, 100, function(change)
-	duration = change
+	nitroDuration = change
 end)
 menu.slider(nitroMenu, "Recharge Time", {}, "How long the boost recharges.\nIn ms.", 0, 10000000, 1000, 100, function(change)
-	recharge = change
+	nitroRecharge = change
 end)
 menu.slider(nitroMenu, "Power", {}, "How much force the boost applies.", 0, 50, 1, 1, function(change)
-	power = change
+	nitroPower = change
 end)
 menu.toggle(nitroMenu, "Sound", {}, "Whether the boost should make sound.", function(toggle)
-	sound = toggle
+	nitroSound = toggle
 end, true)
 
 menu.toggle_loop(vehicleMenu, "Low Traction", {"driftmode"}, "Ideal for drifting.\nSetting a hotkey is recommended.", function()
@@ -619,6 +619,22 @@ players.on_join(function(pid)
 		entities.delete_by_handle(vehicle)
 	end)
 
+	menu.click_slider(menu.player_root(pid), "Set Wanted Level", {}, "Buggy Feature. Can take up to 20 seconds to apply.", 0, 5, 0, 1, function(click)
+		local playerInfo <const> = memory.read_long(entities.handle_to_pointer(PLAYER.GET_PLAYER_PED(pid)) + 0x10C8)
+		local bail <const> = menu.ref_by_rel_path(menu.player_root(pid), "Friendly>Never Wanted")
+		local timeout <const> = os.time() + 20
+		while memory.read_uint(playerInfo + 0x0888) != click and timeout > os.time() do
+			if memory.read_uint(playerInfo + 0x0888) > click then
+				menu.trigger_command(bail, "on")
+				util.yield(100)
+				menu.trigger_command(bail, "off")
+			end
+			for i = 1, 46 do
+				PLAYER.REPORT_CRIME(pid, i, click)
+			end
+			util.yield(100)
+		end
+	end)
 	menu.action(menu.player_root(pid), "Check Language", {}, "Checks the language of their game.", function()
 		util.toast(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)")
 	end)
