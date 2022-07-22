@@ -17,7 +17,6 @@
 util.keep_running()
 util.log("Nexus.lua is now running.")
 util.require_natives("natives-1651208000")
-menu.divider(menu.my_root(), "-- Nexus --")
 
 --[[
 --------------------
@@ -26,7 +25,6 @@ menu.divider(menu.my_root(), "-- Nexus --")
 --]]
 
 local selfMenu <const> = menu.list(menu.my_root(), "Self", {}, "")
-menu.divider(selfMenu, "-- Self --")
 
 menu.toggle(selfMenu, "Undead OTR", {"undeadotr"}, "Better Off The Radar.\nCan get detected by some menus.", function(toggle)
 	undeadOtrToggle = toggle
@@ -59,7 +57,6 @@ end)
 --]]
 
 local vehicleMenu <const> = menu.list(menu.my_root(), "Vehicle", {}, "")
-menu.divider(vehicleMenu, "-- Vehicle --")
 
 local sportmodeSpeed = 10
 local sportmodeNoGravity = false
@@ -83,7 +80,7 @@ function vehicleFly()
 
 	if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
 		util.toast("You need to be inside/on a Vehicle. :/")
-		menu.trigger_command(sportmode, "off")
+		menu.set_value(sportmode, false)
 		return
 	end
 
@@ -138,7 +135,7 @@ function vehicleFly()
 		VEHICLE.SET_VEHICLE_FORWARD_SPEED(vehicle, 0)
 	end
 	if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 2) then
-		menu.trigger_command(sportmode, "off")
+		menu.set_value(sportmode, false)
 		if sportmodeStopOnExit then
 			VEHICLE.SET_VEHICLE_FORWARD_SPEED(vehicle, 0)
 		end
@@ -239,8 +236,6 @@ local languages = {
 }
 
 local languageMenu <const> = menu.list(menu.my_root(), "Language Reactions", {}, "")
-menu.divider(languageMenu, "-- Language Reactions --")
-
 local languageSelectMenu <const> = menu.list(languageMenu, "Languages", {}, "")
 
 local languageNotification = true
@@ -488,6 +483,27 @@ local businessProperties <const> = {
 	"Videogeddon - La Mesa"
 }
 
+local sextsLabels <const> = {
+	"SXT_HCH_1ST",
+	"SXT_HCH_2ND",
+	"SXT_HCH_NEED",
+	"SXT_INF_1ST",
+	"SXT_INF_2ND",
+	"SXT_INF_NEED",
+	"SXT_JUL_1ST",
+	"SXT_JUL_2ND",
+	"SXT_JUL_NEED",
+	"SXT_NIK_1ST",
+	"SXT_NIK_2ND",
+	"SXT_NIK_NEED",
+	"SXT_SAP_1ST",
+	"SXT_SAP_2ND",
+	"SXT_SAP_NEED",
+	"SXT_TXI_1ST",
+	"SXT_TXI_2ND",
+	"SXT_TXI_NEED"
+}
+
 function controlVehicle(pid)
 	local pos <const> = players.get_position(players.user())
 	local targetPos <const> = players.get_position(pid)
@@ -498,7 +514,7 @@ function controlVehicle(pid)
 
 	if targetVehicle == 0 and distance > 340000 then
 		local timeout <const> = os.time() + 3
-		menu.trigger_command(spectate, "on")
+		menu.set_value(spectate, true)
 		while targetVehicle == 0 and timeout > os.time() do
 			targetVehicle = PED.GET_VEHICLE_PED_IS_IN(PLAYER.GET_PLAYER_PED(pid), true)
 			util.yield(100)
@@ -509,16 +525,14 @@ function controlVehicle(pid)
 			return targetVehicle
 		end
 		NETWORK.SET_NETWORK_ID_CAN_MIGRATE(NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(targetVehicle), true)
-		local hasControl = false
-		local loop = 15
-		while not hasControl and loop > 0 do
-			hasControl = NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(targetVehicle)
-			loop -= 1
+		local timeout <const> = os.time() + 5
+		while not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(targetVehicle) and timeout > os.time() do
+			NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(targetVehicle)
 			util.yield(15)
 		end
 	end
 	if not spectating then
-		menu.trigger_command(spectate, "off")
+		menu.set_value(spectate, false)
 	end
 	if targetVehicle == 0 then
 		util.toast(players.get_name(pid) .. " isn't in a vehicle. :/")
@@ -530,7 +544,6 @@ players.on_join(function(pid)
 	menu.divider(menu.player_root(pid), "-- Nexus --")
 
 	local playerSETPMenu <const> = menu.list(menu.player_root(pid), "SE Teleport", {}, "")
-	menu.divider(playerSETPMenu, "-- SE Teleport --")
 
 	local playerSETPCayoPericoMenu <const> = menu.list(playerSETPMenu, "Cayo Perico", {}, "")
 	local playerSETPClubhouseMenu <const> = menu.list(playerSETPMenu, "Clubhouse", {}, "")
@@ -569,8 +582,58 @@ players.on_join(function(pid)
 		end
 	end
 
+	local playerTrollingMenu <const> = menu.list(menu.player_root(pid), "Trolling", {}, "")
+
+	menu.action(playerTrollingMenu, "Send Nudes", {}, "", function()
+		for i = 1, #sextsLabels do
+			local eventData = {-1702264142, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+			local out <const> = sextsLabels[i]:sub(1, 127)
+			for i = 0, #out - 1 do
+				local slot <const> = i // 8
+				eventData[slot + 3] |= string.byte(out, i + 1) << ((i - slot * 8) * 8)
+			end
+			util.trigger_script_event(1 << pid, eventData)
+		end
+	end)
+
+	local playerNotificationSpamMenu <const> = menu.list(playerTrollingMenu, "Notification Spam", {}, "")
+
+	menu.toggle_loop(playerNotificationSpamMenu, "SMS Spam", {}, "", function()
+		util.trigger_script_event(1 << pid, {1903866949, pid, math.random(-2147483647, 2147483647)})
+	end)
+	menu.toggle_loop(playerNotificationSpamMenu, "Nude Spam", {}, "", function()
+		for i = 1, #sextsLabels do
+			local eventData = {-1702264142, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+			local out <const> = sextsLabels[i]:sub(1, 127)
+			for i = 0, #out - 1 do
+				local slot <const> = i // 8
+				eventData[slot + 3] |= string.byte(out, i + 1) << ((i - slot * 8) * 8)
+			end
+			util.trigger_script_event(1 << pid, eventData)
+		end
+	end)
+	menu.toggle_loop(playerNotificationSpamMenu, "Invite Notification", {}, "", function()
+		util.trigger_script_event(1 << pid, {1132878564, pid, math.random(1, 6)})
+	end)
+	menu.toggle_loop(playerNotificationSpamMenu, "Invite Notification v2", {}, "", function()
+		util.trigger_script_event(1 << pid, {150518680, pid, math.random(1, 150), -1, -1})
+		util.yield(25)
+	end)
+	menu.toggle_loop(playerNotificationSpamMenu, "Checkpoint Notification", {}, "", function()
+		util.trigger_script_event(1 << pid, {677240627, pid, -1774405356, 0, 0, 0, 0, 0, 0, 0, pid, 0, 0, 0})
+		util.yield(25)
+	end)
+	menu.toggle_loop(playerNotificationSpamMenu, "Character Notification", {}, "", function()
+		util.trigger_script_event(1 << pid, {922450413, pid, math.random(0, 178), 0, 0, 0})
+	end)
+	menu.toggle_loop(playerNotificationSpamMenu, "SMS Label", {}, "", function()
+		util.trigger_script_event(1 << pid, {-1702264142, pid, math.random(-2147483647, 2147483647)})
+	end)
+	menu.toggle_loop(playerNotificationSpamMenu, "Error Label", {}, "", function()
+		util.trigger_script_event(1 << pid, {-1675759720, pid, math.random(-2147483647, 2147483647)})
+	end)
+
 	local playerVehicleMenu <const> = menu.list(menu.player_root(pid), "Vehicle", {}, "Functionality depends on network conditions.")
-	menu.divider(playerVehicleMenu, "-- Vehicle --")
 
 	menu.action(playerVehicleMenu, "Fix", {}, "", function()
 		local vehicle <const> = controlVehicle(pid)
@@ -625,9 +688,9 @@ players.on_join(function(pid)
 		local timeout <const> = os.time() + 20
 		while memory.read_uint(playerInfo + 0x0888) != click and timeout > os.time() do
 			if memory.read_uint(playerInfo + 0x0888) > click then
-				menu.trigger_command(bail, "on")
-				util.yield(100)
-				menu.trigger_command(bail, "off")
+				menu.set_value(bail, true)
+				util.yield(500)
+				menu.set_value(bail, false)
 			end
 			for i = 1, 46 do
 				PLAYER.REPORT_CRIME(pid, i, click)
