@@ -8,6 +8,7 @@
 -------------------
 ----- Jackz -------
 ----- Jayphen -----
+----- Lance -------
 ----- Nowiry ------
 ----- Prism -------
 ----- Sapphire ----
@@ -26,28 +27,33 @@ util.require_natives("natives-1651208000")
 
 local selfMenu <const> = menu.list(menu.my_root(), "Self", {}, "")
 
-menu.toggle(selfMenu, "Undead OTR", {"undeadotr"}, "Better Off The Radar.\nCan get detected by some menus.", function(toggle)
-	undeadOtrToggle = toggle
-	local maxHealth <const> = ENTITY.GET_ENTITY_MAX_HEALTH(players.user_ped())
-	while undeadOtrToggle do
-		ENTITY.SET_ENTITY_MAX_HEALTH(players.user_ped(), 0)
-		util.yield()
+menu.toggle_loop(selfMenu, "Undead OTR", {"undeadotr"}, "Better Off The Radar.\nCan get detected by some menus.", function()
+	ENTITY.SET_ENTITY_MAX_HEALTH(players.user_ped(), 0)
+end, function()
+	local rank <const> = players.get_rank(players.user())
+	local maxHealth
+	if rank == 0 then
+		maxHealth = 328
+	elseif rank < 20 then
+		maxHealth = 238
+	elseif rank < 40 then
+		maxHealth = 256
+	elseif rank < 60 then
+		maxHealth = 274
+	elseif rank < 80 then
+		maxHealth = 292
+	elseif rank < 100 then
+		maxHealth = 310
+	else
+		maxHealth = 328
 	end
 	ENTITY.SET_ENTITY_MAX_HEALTH(players.user_ped(), maxHealth)
-	undeadOtrToggle = nil
 end)
 
-menu.toggle(selfMenu, "No Knockout", {"noknockout"}, "Prevents the knockout animation from playing on your ped.", function(toggle)
-	noKnockoutToggle = toggle
-	if noKnockoutToggle then
-		util.toast("Note that this will prevent you from joining new sessions and giving yourself weapons. :)")
-	end
-	while noKnockoutToggle do
-		PED.SET_PED_CONFIG_FLAG(players.user_ped(), 71, true)
-		util.yield()
-	end
+menu.toggle_loop(selfMenu, "No Knockout", {"noknockout"}, "Disables the knockout animation.\nNote that this will prevent you from joining new sessions and giving yourself weapons.", function()
+	PED.SET_PED_CONFIG_FLAG(players.user_ped(), 71, true)
+end, function()
 	PED.SET_PED_CONFIG_FLAG(players.user_ped(), 71, false)
-	noKnockoutToggle = nil
 end)
 
 --[[
