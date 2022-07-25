@@ -280,7 +280,7 @@ for i, v in ipairs(languages) do
 				local playerList <const> = players.list(false, true, true)
 				for i, pid in ipairs(playerList) do
 					if languages[players.get_language(pid) + 1].toggle then
-						chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
+						chat.send_message("> " .. players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
 						util.yield(100)
 					end
 				end
@@ -289,7 +289,7 @@ for i, v in ipairs(languages) do
 				local playerList <const> = players.list(false, true, true)
 				for i, pid in ipairs(playerList) do
 					if languages[players.get_language(pid) + 1].toggle then
-						chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
+						chat.send_message("> " .. players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
 						util.yield(100)
 					end
 				end
@@ -357,7 +357,7 @@ menu.toggle(languageReactionMenu, "Announce In Chat", {}, "", function(toggle)
 		local playerList <const> = players.list(false, true, true)
 		for i, pid in ipairs(playerList) do
 			if languages[players.get_language(pid) + 1].toggle then
-				chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
+				chat.send_message("> " .. players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
 				util.yield(100)
 			end
 		end
@@ -372,7 +372,7 @@ menu.toggle(languageReactionMenu, "Announce In Team Chat", {}, "", function(togg
 		local playerList <const> = players.list(false, true, true)
 		for i, pid in ipairs(playerList) do
 			if languages[players.get_language(pid) + 1].toggle then
-				chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
+				chat.send_message("> " .. players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
 				util.yield(100)
 			end
 		end
@@ -428,12 +428,12 @@ players.on_join(function(pid)
 	end
 	if languageChat then
 		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
-			chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
+			chat.send_message("> " .. players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", false, true, true)
 		end
 	end
 	if languageTeamChat then
 		if languages[players.get_language(pid) + 1].toggle and pid != players.user() then
-			chat.send_message(players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
+			chat.send_message("> " .. players.get_name(pid) .. "'s game is in " .. languages[players.get_language(pid) + 1].language .. ". :)", true, true, true)
 		end
 	end
 	if languageCrash then
@@ -457,6 +457,24 @@ end)
 --]]
 
 local miscellaneousMenu <const> = menu.list(menu.my_root(), "Miscellaneous", {}, "")
+local sessionMenu <const> = menu.list(miscellaneousMenu, "Session", {}, "")
+
+menu.click_slider(sessionMenu, "Max Players", {"maxplayers"}, "Sets the max amount of players for this session. Requires host.", 1, 32, 32, 1, function(click)
+	if players.user() == players.get_host() then
+		NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(0, click)
+		util.toast("Free Player Slots: " .. NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(0) .. ". :)")
+	else
+		util.toast("This command is only available when you're the host. :|")
+	end
+end)
+menu.click_slider(sessionMenu, "Max Spectators", {"maxspectators"}, "Sets the max amount of spectators for this session. Requires host.", 0, 2, 2, 1, function(click)
+	if players.user() == players.get_host() then
+		NETWORK.NETWORK_SESSION_SET_MATCHMAKING_GROUP_MAX(4, click)
+		util.toast("Free Spectator Slots: " .. NETWORK.NETWORK_SESSION_GET_MATCHMAKING_GROUP_FREE(4) .. ". :)")
+	else
+		util.toast("This command is only available when you're the host. :|")
+	end
+end)
 
 menu.toggle_loop(miscellaneousMenu, "Chat Icon Translation Helper", {}, "Converts R*, Created.R*, Verified.R*, Lock.R* and Blank.R* to their icons.", function()
 	if chat.is_open() then
