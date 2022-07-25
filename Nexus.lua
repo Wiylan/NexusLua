@@ -451,6 +451,40 @@ players.on_join(function(pid)
 end)
 
 --[[
+-----------------------------
+--- Miscellaneous Options ---
+-----------------------------
+--]]
+
+local miscellaneousMenu <const> = menu.list(menu.my_root(), "Miscellaneous", {}, "")
+
+menu.toggle_loop(miscellaneousMenu, "Chat Icon Translation Helper", {}, "Converts R*, Created.R*, Verified.R*, Lock.R* and Blank.R* to their icons.", function()
+	if chat.is_open() then
+		local draft <const> = string.lower(chat.get_draft())
+		if string.contains(draft, "r*") then
+			chat.remove_from_draft(2)
+			chat.add_to_draft("∑")
+		end
+		if string.contains(draft, "created.r*") then
+			chat.remove_from_draft(9)
+			chat.add_to_draft("‹")
+		end
+		if string.contains(draft, "verified.r*") then
+			chat.remove_from_draft(10)
+			chat.add_to_draft("¦")
+		end
+		if string.contains(draft, "lock.r*") then
+			chat.remove_from_draft(6)
+			chat.add_to_draft("Ω")
+		end
+		if string.contains(draft, "blank.r*") then
+			chat.remove_from_draft(7)
+			chat.add_to_draft("›")
+		end
+	end
+end)
+
+--[[
 ----------------------
 --- Player Options ---
 ----------------------
@@ -510,7 +544,7 @@ local sextsLabels <const> = {
 	"SXT_TXI_NEED"
 }
 
-function controlVehicle(pid)
+local function controlVehicle(pid)
 	local pos <const> = players.get_position(players.user())
 	local targetPos <const> = players.get_position(pid)
 	local distance <const> = SYSTEM.VDIST2(targetPos.x, targetPos.y, 0, pos.x, pos.y, 0)
