@@ -609,33 +609,33 @@ players.on_join(function(pid)
 	local playerSETPArcadeMenu <const> = menu.list(playerSETPMenu, "Arcade", {}, "Will force them on a vehicle.")
 
 	menu.action(playerSETPCayoPericoMenu, "Teleport To Cayo Perico", {}, "", function()
-		util.trigger_script_event(1 << pid, {1463943751, pid, 0, 0, 3, 1, 0})
+		util.trigger_script_event(1 << pid, {1214823473, pid, 0, 0, 3, 1, 0})
 	end)
 	menu.action(playerSETPCayoPericoMenu, "Teleport To Cayo Perico (No Cutscene)", {}, "", function()
-		util.trigger_script_event(1 << pid, {1463943751, pid, 0, 0, 4, 1, 0})
+		util.trigger_script_event(1 << pid, {1214823473, pid, 0, 0, 4, 1, 0})
 	end)
 	menu.action(playerSETPCayoPericoMenu, "Teleport To Main Island", {}, "Target needs to be at Cayo Perico.", function()
-		util.trigger_script_event(1 << pid, {1463943751, pid, 0, 0, 3, 0, 0})
+		util.trigger_script_event(1 << pid, {1214823473, pid, 0, 0, 3, 0, 0})
 	end)
 	menu.action(playerSETPCayoPericoMenu, "Kicked From Cayo Perico", {}, "Summons them to Del Perro Beach.", function()
-		util.trigger_script_event(1 << pid, {1463943751, pid, 0, 0, 4, 0, 0})
+		util.trigger_script_event(1 << pid, {1214823473, pid, 0, 0, 4, 0, 0})
 	end)
 
 	for i, name in ipairs(businessProperties) do
 		if i < 13 then
 			menu.action(playerSETPClubhouseMenu, name, {}, "", function()
 				local netHash <const> = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid)
-				util.trigger_script_event(1 << pid, {962740265, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, math.random(1, 10)})
+				util.trigger_script_event(1 << pid, {-555356783, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, math.random(1, 10)})
 			end)
 		elseif i < 22 then
 			menu.action(playerSETPFacilityMenu, name, {}, "", function()
 				local netHash <const> = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid)
-				util.trigger_script_event(1 << pid, {962740265, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0})
+				util.trigger_script_event(1 << pid, {-555356783, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0})
 			end)
 		else
 			menu.action(playerSETPArcadeMenu, name, {}, "Will force them on a vehicle.", function()
 				local netHash <const> = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid)
-				util.trigger_script_event(1 << pid, {962740265, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1})
+				util.trigger_script_event(1 << pid, {-555356783, pid, i, 32, netHash, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1})
 			end)
 		end
 	end
@@ -644,7 +644,7 @@ players.on_join(function(pid)
 
 	menu.action(playerTrollingMenu, "Send Nudes", {}, "", function()
 		for i = 1, #sextsLabels do
-			local eventData = {-1702264142, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+			local eventData = {-791892894, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 			local out <const> = sextsLabels[i]:sub(1, 127)
 			for i = 0, #out - 1 do
 				local slot <const> = i // 8
@@ -657,11 +657,11 @@ players.on_join(function(pid)
 	local playerNotificationSpamMenu <const> = menu.list(playerTrollingMenu, "Notification Spam", {}, "")
 
 	menu.toggle_loop(playerNotificationSpamMenu, "SMS Spam", {}, "", function()
-		util.trigger_script_event(1 << pid, {1903866949, pid, math.random(-2147483647, 2147483647)})
+		util.trigger_script_event(1 << pid, {1670832796, pid, math.random(-2147483647, 2147483647)})
 	end)
 	menu.toggle_loop(playerNotificationSpamMenu, "Nude Spam", {}, "", function()
 		for i = 1, #sextsLabels do
-			local eventData = {-1702264142, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+			local eventData = {-791892894, players.user(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 			local out <const> = sextsLabels[i]:sub(1, 127)
 			for i = 0, #out - 1 do
 				local slot <const> = i // 8
@@ -671,24 +671,21 @@ players.on_join(function(pid)
 		end
 	end)
 	menu.toggle_loop(playerNotificationSpamMenu, "Invite Notification", {}, "", function()
-		util.trigger_script_event(1 << pid, {1132878564, pid, math.random(1, 6)})
+		util.trigger_script_event(1 << pid, {1111927333, pid, math.random(1, 6)})
 	end)
 	menu.toggle_loop(playerNotificationSpamMenu, "Invite Notification v2", {}, "", function()
-		util.trigger_script_event(1 << pid, {150518680, pid, math.random(1, 150), -1, -1})
+		util.trigger_script_event(1 << pid, {-668341698, pid, math.random(1, 150), -1, -1})
 		util.yield(25)
 	end)
 	menu.toggle_loop(playerNotificationSpamMenu, "Checkpoint Notification", {}, "", function()
-		util.trigger_script_event(1 << pid, {677240627, pid, -1774405356, 0, 0, 0, 0, 0, 0, 0, pid, 0, 0, 0})
+		util.trigger_script_event(1 << pid, {-1529596656, pid, -547323955, 0, 0, 0, 0, 0, 0, 0, pid, 0, 0, 0})
 		util.yield(25)
 	end)
 	menu.toggle_loop(playerNotificationSpamMenu, "Character Notification", {}, "", function()
-		util.trigger_script_event(1 << pid, {922450413, pid, math.random(0, 178), 0, 0, 0})
-	end)
-	menu.toggle_loop(playerNotificationSpamMenu, "SMS Label", {}, "", function()
-		util.trigger_script_event(1 << pid, {-1702264142, pid, math.random(-2147483647, 2147483647)})
+		util.trigger_script_event(1 << pid, {-634789188, pid, math.random(0, 178), 0, 0, 0})
 	end)
 	menu.toggle_loop(playerNotificationSpamMenu, "Error Label", {}, "", function()
-		util.trigger_script_event(1 << pid, {-1675759720, pid, math.random(-2147483647, 2147483647)})
+		util.trigger_script_event(1 << pid, {-1251171789, pid, math.random(-2147483647, 2147483647)})
 	end)
 
 	local playerVehicleMenu <const> = menu.list(menu.player_root(pid), "Vehicle", {}, "Functionality depends on network conditions.")
