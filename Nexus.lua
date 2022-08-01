@@ -16,8 +16,33 @@
 --]]
 
 util.keep_running()
-util.log("Nexus.lua is now running.")
-util.require_natives("natives-1651208000")
+util.log(SCRIPT_FILENAME .. " is now running.")
+util.require_natives(1651208000)
+
+local function update()
+	local commit <const> = "23\n"
+	async_http.init("raw.githubusercontent.com", "/Wiylan/NexusLua/main/version.txt", function(data)
+		if commit != data then
+			util.toast("Update available. Downloading. :)")
+			async_http.init("raw.githubusercontent.com", "/Wiylan/NexusLua/main/Nexus.lua", function(data2)
+				local file <const> = io.open(filesystem.scripts_dir() .. SCRIPT_RELPATH, "wb")
+				file:write(data2)
+				file:close()
+				util.toast("Update successful. :)\nYou will need to restart the script.")
+				util.stop_script()
+			end, function()
+				util.toast("Failed to download updates. :/\nMake sure you are connected to the internet and stand isn't blocking internet access.")
+				util.log(SCRIPT_FILENAME .. " failed to download updates.")
+			end)
+			async_http.dispatch()
+		end
+	end, function()
+		util.toast("Failed to check for updates. :/\nMake sure you are connected to the internet and stand isn't blocking internet access.")
+		util.log(SCRIPT_FILENAME .. " failed to check for updates.")
+	end)
+	async_http.dispatch()
+end
+update()
 
 --[[
 --------------------
