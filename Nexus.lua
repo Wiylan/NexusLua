@@ -20,7 +20,7 @@ util.log(SCRIPT_FILENAME .. " is now running.")
 util.require_natives(1651208000)
 
 local function update()
-	local commit <const> = "23\n"
+	local commit <const> = "23"
 	async_http.init("raw.githubusercontent.com", "/Wiylan/NexusLua/main/version.txt", function(data)
 		if commit != data then
 			util.toast("Update available. Downloading. :)")
