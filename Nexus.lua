@@ -20,7 +20,7 @@ util.log(SCRIPT_FILENAME .. " is now running.")
 util.require_natives(1651208000)
 
 local function update()
-	local commit <const> = "23"
+	local commit <const> = "25"
 	async_http.init("raw.githubusercontent.com", "/Wiylan/NexusLua/main/version.txt", function(data)
 		if commit != data then
 			util.toast("Update available. Downloading. :)")
@@ -106,10 +106,10 @@ end)
 
 function vehicleFly()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-	local camPos <const> = CAM.GET_GAMEPLAY_CAM_ROT(0)
+	local camPos <const> = players.get_cam_rot(players.user())
 	local speed = sportmodeSpeed * 10
 
-	if not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+	if not PED.IS_PED_IN_VEHICLE(players.user_ped(), vehicle, false) or not NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
 		util.toast("You need to be inside/on a Vehicle. :/")
 		menu.set_value(sportmode, false)
 		return
@@ -201,8 +201,10 @@ local nitroSound = true
 
 menu.toggle_loop(nitroMenu, "Nitro", {"nitro"}, "Activate with X.", function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-	if PAD.IS_CONTROL_JUST_PRESSED(0, 73) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
-		STREAMING.REQUEST_NAMED_PTFX_ASSET("veh_xs_vehicle_mods")
+	if PAD.IS_CONTROL_JUST_PRESSED(0, 73) and PED.IS_PED_IN_VEHICLE(players.user_ped(), vehicle, false) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+		if not STREAMING.HAS_NAMED_PTFX_ASSET_LOADED("veh_xs_vehicle_mods") then
+			STREAMING.REQUEST_NAMED_PTFX_ASSET("veh_xs_vehicle_mods")
+		end
 		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, true, nitroDuration / 1000, nitroPower, 10000000, not nitroSound)
 		util.yield(nitroDuration)
 		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, false, 1, 1, 1, false)
@@ -212,6 +214,9 @@ end, function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
 	if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
 		VEHICLE._SET_VEHICLE_NITRO_ENABLED(vehicle, false, 1, 1, 1, false)
+	end
+	if STREAMING.HAS_NAMED_PTFX_ASSET_LOADED("veh_xs_vehicle_mods") then
+		STREAMING.REMOVE_NAMED_PTFX_ASSET("veh_xs_vehicle_mods")
 	end
 end)
 
@@ -230,7 +235,7 @@ end, true)
 
 menu.toggle_loop(vehicleMenu, "Low Traction", {"driftmode"}, "Ideal for drifting.\nSetting a hotkey is recommended.", function()
 	local vehicle <const> = PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false)
-	if NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+	if PED.IS_PED_IN_VEHICLE(players.user_ped(), vehicle, false) and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
 		VEHICLE.SET_VEHICLE_REDUCE_GRIP(vehicle, true)
 		--VEHICLE._SET_VEHICLE_REDUCE_TRACTION(vehicle, 0)
 		if TASK.GET_IS_TASK_ACTIVE(players.user_ped(), 2) then
@@ -717,26 +722,34 @@ players.on_join(function(pid)
 
 	menu.action(playerVehicleMenu, "Fix", {}, "", function()
 		local vehicle <const> = controlVehicle(pid)
-		VEHICLE.SET_VEHICLE_FIXED(vehicle)
-		VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
-		VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0)
+		if vehicle != 0 then
+			VEHICLE.SET_VEHICLE_FIXED(vehicle)
+			VEHICLE.SET_VEHICLE_DEFORMATION_FIXED(vehicle)
+			VEHICLE.SET_VEHICLE_DIRT_LEVEL(vehicle, 0)
+		end
 	end)
 	menu.action(playerVehicleMenu, "Tune", {}, "", function()
 		local vehicle <const> = controlVehicle(pid)
-		VEHICLE.SET_VEHICLE_MOD_KIT(vehicle, 0)
-		for i = 0, 50 do
-			VEHICLE.SET_VEHICLE_MOD(vehicle, i, VEHICLE.GET_NUM_VEHICLE_MODS(vehicle, i) - 1, false)
+		if vehicle != 0 then
+			VEHICLE.SET_VEHICLE_MOD_KIT(vehicle, 0)
+			for i = 0, 50 do
+				VEHICLE.SET_VEHICLE_MOD(vehicle, i, VEHICLE.GET_NUM_VEHICLE_MODS(vehicle, i) - 1, false)
+			end
 		end
 	end)
 	menu.action(playerVehicleMenu, "Kill Engine", {}, "", function()
 		local vehicle <const> = controlVehicle(pid)
-		VEHICLE.SET_VEHICLE_ENGINE_HEALTH(vehicle, -4000)
+		if vehicle != 0 then
+			VEHICLE.SET_VEHICLE_ENGINE_HEALTH(vehicle, -4000)
+		end
 	end)
 	menu.action(playerVehicleMenu, "Burst Tires", {}, "", function()
 		local vehicle <const> = controlVehicle(pid)
-		VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(vehicle, true)
-		for i = 0, 7 do
-			VEHICLE.SET_VEHICLE_TYRE_BURST(vehicle, i, true, 1000)
+		if vehicle != 0 then
+			VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(vehicle, true)
+			for i = 0, 7 do
+				VEHICLE.SET_VEHICLE_TYRE_BURST(vehicle, i, true, 1000)
+			end
 		end
 	end)
 	menu.action(playerVehicleMenu, "Boost Forward", {}, "May not sync.", function()
@@ -759,7 +772,9 @@ players.on_join(function(pid)
 	end)
 	menu.action(playerVehicleMenu, "Delete", {}, "", function()
 		local vehicle <const> = controlVehicle(pid)
-		entities.delete_by_handle(vehicle)
+		if vehicle != 0 then
+			entities.delete_by_handle(vehicle)
+		end
 	end)
 
 	menu.click_slider(menu.player_root(pid), "Set Wanted Level", {}, "Buggy Feature. Can take up to 20 seconds to apply.", 0, 5, 0, 1, function(click)
